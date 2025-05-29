@@ -14,24 +14,22 @@ with ni.Task() as task:
     task.ai_channels.add_ai_thrmcpl_chan("cDAQ1Mod2/ai3",                                   # Find this channel in Measurement & Automation Explorer (MAX)
                                          units=ni.constants.TemperatureUnits.DEG_C,        
                                          thermocouple_type=ni.constants.ThermocoupleType.K, 
-                                         cjc_source=ni.constants.CJCSource.BUILT_IN)        
-    
+                                         cjc_source=ni.constants.CJCSource.BUILT_IN)
+    """ ADD THIS LINE FOR SIMULTANEOUS CONVERSION
+    task.ai_channels.add_ai_thrmcpl_chan("cDAQ1Mod2/ai0",                                   
+                                         units=ni.constants.TemperatureUnits.DEG_C,        
+                                         thermocouple_type=ni.constants.ThermocoupleType.K, 
+                                         cjc_source=ni.constants.CJCSource.BUILT_IN)
+    """
     task.timing.cfg_samp_clk_timing(rate=25,                                               # Adjustable Sampling rate in Hz  
                                      active_edge=ni.constants.Edge.RISING,                  
                                      sample_mode=ni.constants.AcquisitionType.CONTINUOUS)   # Continuous sampling mode based on sample rate and samples per channel
+    
+    task.in_stream.input_buf_size = 10000 # Adjustable input buffer size, might need increase in long runs
 
     task.start()
 
     while True:
         temperature = task.read(number_of_samples_per_channel=5)     # Read 5 samples from the Aquistion Task (adjustable) and saves on an array
-        print(f"Temperature: {temperature[0]} ºC")                   # Print a sample of the temperature reading
-
-        """
-        Note: reducing the number of prints per second without losing data can be done by adjusting the number of samples read.
-
-        temperature = task.read(number_of_samples_per_channel=125)
-        print(f"Temperature: {temperature[0]} ºC")
-
-        This will read 125 samples, so a print occurs every 5 seconds.
-        """
+        print(f"Temperature: {temperature[0]} ºC")                   # Print a sample (OR first array in case of two sensoring) of the temperature reading
 # The code above will run indefinitely, reading and printing 5 times per second.
